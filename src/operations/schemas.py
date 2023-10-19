@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 
 class OperationCreate(BaseModel):
-    id: int
     quantity:str
     figi:str
     instrument_type: str
@@ -15,3 +14,11 @@ class OperationCreate(BaseModel):
 class OperationUpdate(BaseModel):
     quantity: str
     date: datetime
+
+class OperationRead(BaseModel):
+    id: int
+    quantity: str
+    figi: str
+    instrument_type: str
+    date: datetime
+    type: str

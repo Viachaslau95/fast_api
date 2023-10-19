@@ -13,7 +13,7 @@ router = APIRouter(
 
 
 @router.get('/')
-async def get_specific_operation(operation_type: str, session: AsyncSession = Depends(get_async_session)):
+async def get_specific_operations(operation_type: str, session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(operation).where(operation.c.type == operation_type)
         result = await session.execute(query)
@@ -30,22 +30,25 @@ async def get_specific_operation(operation_type: str, session: AsyncSession = De
         }
 
 
+@router.get('/{operation_id}')
+async def get_specific_operation(operation_id: int, session: AsyncSession = Depends(get_async_session)):
+    spec_operation = select(operation).where(operation.c.id == operation_id)
+    result = await session.execute(spec_operation)
+    return {
+        "status": "seccess",
+        "data": result.mappings().all(),
+        "details": None
+    }
+
 @router.post('/')
 async def add_specific_operation(new_operation: OperationCreate, session: AsyncSession = Depends(get_async_session)):
-    try:
-        stmt = insert(operation).values(**new_operation.__dict__)
-        await session.execute(stmt)
-        await session.commit()
-        return {"statue": HTTPException(status_code=201, detail="Operation added")}
-    except Exception as exc:
-        return {
-            "status": "error",
-            "data": None,
-            "details": exc
-        }
+    stmt = insert(operation).values(**new_operation.__dict__)
+    await session.execute(stmt)
+    await session.commit()
+    return {"statue": HTTPException(status_code=201, detail="Operation added")}
 
 
-@router.delete('/operation_id')
+@router.delete('/{operation_id}')
 async def delete_specific_operation(operation_id: int, session: AsyncSession = Depends(get_async_session)):
     try:
         stmt = delete(operation).where(operation.c.id==operation_id)
@@ -62,7 +65,7 @@ async def delete_specific_operation(operation_id: int, session: AsyncSession = D
         }
 
 
-@router.put('/operation_id')
+@router.put('/{operation_id}')
 async def update_specific_operation(operation_id: int, update_operations:OperationUpdate, session: AsyncSession = Depends(get_async_session)):
     try:
         stmt = update(operation).where(operation.c.id==operation_id).values(**update_operations.__dict__)
@@ -77,3 +80,4 @@ async def update_specific_operation(operation_id: int, update_operations:Operati
             "data": None,
             "details": exc
         }
+
